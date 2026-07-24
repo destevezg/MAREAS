@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Calculadora de Mareas</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+  margin: 0;
+  padding: 20px;
+  color: #0f172a;
+  min-height: 100vh;
+}
+.container {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 10px 40px rgba(2, 132, 199, 0.10);
+  padding: 32px;
+}
+h1 {
+  margin: 0 0 6px 0;
+  color: #0c4a6e;
+  font-size: 28px;
+}
+h1 .wave { color: #0ea5e9; }
+.subtitle {
+  color: #64748b;
+  margin: 0 0 24px 0;
+  font-size: 15px;
+}
+h2 {
+  color: #0c4a6e;
+  margin-top: 26px;
+  font-size: 20px;
+}
+h3 {
+  color: #075985;
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+.modo-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #e2e8f0;
+}
+.tab {
+  padding: 12px 22px;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  font-family: inherit;
+}
+.tab.active {
+  color: #0284c7;
+  border-bottom-color: #0ea5e9;
+}
+.tab:hover:not(.active) { color: #334155; }
+.section {
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin-bottom: 18px;
+  border: 1px solid #e2e8f0;
+}
+.row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.field {
+  flex: 1;
+  min-width: 160px;
+  margin-bottom: 6px;
+}
+.field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+input[type=date],
+input[type=time],
+input[type=number],
+input[type=text],
+select {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  background: white;
+}
+input:focus, select:focus {
+  outline: none;
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 3px rgba(14,165,233,0.18);
+}
+.tides-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+.tides-table th, .tides-table td {
+  padding: 6px 8px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+.tides-table th {
+  background: #e0f2fe;
+  font-size: 12px;
+  color: #0c4a6e;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.tides-table input, .tides-table select { margin: 0; }
+.btn {
+  background: #0ea5e9;
+  color: white;
+  border: none;
+  padding: 12px 28px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 7px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.btn:hover { background: #0284c7; }
+.btn-sm {
+  background: #64748b;
+  font-size: 13px;
+  padding: 7px 14px;
+}
+.btn-sm:hover { background: #475569; }
+.btn-add { background: #10b981; }
+.btn-add:hover { background: #059669; }
+.btn-del {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 5px 9px;
+  font-weight: 700;
+  font-size: 14px;
+}
+.btn-del:hover { background: #fecaca; }
+.btn-example {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+.btn-example:hover { background: #e2e8f0; }
+
+.result {
+  background: linear-gradient(135deg, #0ea5e9 0%, #075985 100%);
+  color: white;
+  padding: 28px;
+  border-radius: 12px;
+  margin-top: 22px;
+  box-shadow: 0 8px 25px rgba(2, 132, 199, 0.25);
+}
+.result h2 { color: white; margin-top: 0; }
+.big-result {
+  font-size: 46px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  line-height: 1.1;
+}
+.big-result .unit {
+  font-size: 22px;
+  font-weight: 400;
+  opacity: 0.85;
+  margin-left: 5px;
+}
+.result-sub {
+  font-size: 14px;
+  opacity: 0.9;
+  margin-top: 6px;
+}
+.result-detail {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+.result-card {
+  background: rgba(255,255,255,0.13);
+  padding: 10px 14px;
+  border-radius: 7px;
+  backdrop-filter: blur(5px);
+}
+.result-card .label {
+  font-size: 11px;
+  opacity: 0.85;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.result-card .value {
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.steps {
+  background: #fffbeb;
+  border-left: 4px solid #f59e0b;
+  padding: 18px 22px;
+  margin-top: 20px;
+  border-radius: 6px;
+}
+.steps h3 { color: #92400e; margin-top: 0; }
+.steps ol { margin: 6px 0 0 0; padding-left: 20px; }
+.steps li { margin-bottom: 12px; line-height: 1.6; }
+.formula {
+  font-family: "Cambria Math", "Georgia", serif;
+  font-style: italic;
+  background: white;
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid #fde68a;
+  font-size: 14px;
+  margin: 2px 0;
+}
+.formula b { font-weight: 700; }
+.error {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 14px 18px;
+  border-radius: 7px;
+  margin-top: 14px;
+  border-left: 4px solid #ef4444;
+}
+.graph-container {
+  background: white;
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 20px;
+  border: 1px solid #e2e8f0;
+}
+.graph-container svg { width: 100%; height: auto; display: block; }
+.hidden { display: none; }
+.adv-hint {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+.notice {
+  background: #dbeafe;
+  border-left: 4px solid #3b82f6;
+  padding: 10px 14px;
+  border-radius: 5px;
+  font-size: 13px;
+  margin-bottom: 14px;
+  color: #1e3a8a;
+}
+.candidate {
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 10px;
+}
+.candidate .hora-big {
+  font-size: 32px;
+  font-weight: 700;
+  color: #0c4a6e;
+}
+.candidate .badge {
+  display: inline-block;
+  padding: 2px 10px;
+  background: #e0f2fe;
+  color: #0369a1;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: 8px;
+}
+.tides-row-creciente { background: rgba(16,185,129,0.04); }
+.tides-row-vaciante  { background: rgba(239,68,68,0.04); }
+.example-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+@media (max-width: 720px) {
+  .container { padding: 18px; }
+  .row { gap: 10px; }
+  .big-result { font-size: 38px; }
+}
+
+/* Nautical theme */
+body::before {
+  content: "";
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='30' viewBox='0 0 120 30'><path d='M0 20 Q15 10 30 20 T60 20 T90 20 T120 20' fill='none' stroke='%230ea5e9' stroke-width='1.2' opacity='0.06'/></svg>");
+  background-size: 240px 60px;
+  background-repeat: repeat;
+}
+.container { position: relative; z-index: 1; }
+.header-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 6px 0 22px 0;
+  border-bottom: 3px double #bae6fd;
+  margin-bottom: 22px;
+}
+.deco-icon {
+  flex: 0 0 96px;
+  width: 96px;
+  height: 96px;
+}
+.deco-icon svg {
+  width: 100%; height: 100%;
+  filter: drop-shadow(0 2px 4px rgba(15,23,42,0.15));
+}
+.title-block { flex: 1; text-align: center; }
+.title-block h1 {
+  font-family: "Georgia", "Cambria", serif;
+  font-size: 30px;
+  margin: 0;
+  color: #0c4a6e;
+  border: none; padding: 0;
+  letter-spacing: -0.5px;
+}
+.title-block h1 .wave { color: #0ea5e9; font-weight: 400; }
+.title-block .author {
+  color: #0369a1;
+  font-style: italic;
+  margin: 6px 0 8px 0;
+  font-size: 14px;
+  font-family: "Georgia", serif;
+}
+.title-block .author b { color: #0c4a6e; font-weight: 700; }
+.title-block .subtitle {
+  margin: 0 auto;
+  font-size: 14px;
+  max-width: 560px;
+  color: #475569;
+}
+.notice.warning {
+  background: #fef3c7;
+  border-left-color: #f59e0b;
+  color: #78350f;
+}
+.rope-divider {
+  height: 12px;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    #c2a878 0px, #c2a878 4px,
+    #d4b88c 4px, #d4b88c 8px,
+    #8b6f47 8px, #8b6f47 12px,
+    #d4b88c 12px, #d4b88c 16px
+  );
+  border-radius: 7px;
+  margin: 28px auto 16px;
+  max-width: 340px;
+  opacity: 0.55;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+}
+.footer {
+  text-align: center;
+  margin-top: 14px;
+  color: #475569;
+  font-size: 14px;
+  font-family: "Georgia", serif;
+  font-style: italic;
+}
+.footer .wheel {
+  display: inline-block;
+  vertical-align: middle;
+  width: 32px; height: 32px;
+  margin: 0 10px;
+  opacity: 0.7;
+}
+.footer b { color: #0c4a6e; font-style: normal; }
+.btn-anuario {
+  background: #1e3a8a;
+}
+.btn-anuario:hover { background: #1e40af; }
+.ihm-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 8px 14px;
+  border-radius: 6px;
+  color: #1e3a5f;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+  margin-top: 10px;
+}
+.ihm-link:hover { background: #e2e8f0; }
+h1 {
+  /* legacy override removed for header-bar */
+}
+@media (max-width: 720px) {
+  .header-bar { flex-direction: column; gap: 8px; }
+  .deco-icon { flex: 0 0 78px; width: 78px; height: 78px; }
+  .title-block h1 { font-size: 24px; }
+}
+
+/* HOY button */
+.btn-hoy {
+  background: #0c4a6e;
+  color: white;
+  border: none;
+  padding: 0 14px;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 1px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.btn-hoy:hover { background: #082f49; }
+
+/* Inverse mode visual distinction */
+.mode-banner.inverse {
+  background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%);
+  border-left: 5px solid #ea580c;
+  border-radius: 10px;
+  padding: 18px 22px;
+  margin-bottom: 18px;
+  box-shadow: 0 2px 8px rgba(234,88,12,0.08);
+}
+.mode-banner-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #7c2d12;
+  margin-bottom: 8px;
+  font-family: "Georgia", serif;
+}
+.mode-banner-desc {
+  color: #9a3412;
+  font-size: 13px;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+.mode-banner-formula {
+  background: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-family: "Cambria Math", "Cambria", Georgia, serif;
+  font-style: italic;
+  font-size: 14px;
+  color: #7c2d12;
+  border: 1px dashed #fdba74;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+}
+.mode-banner-formula .arrow {
+  color: #ea580c;
+  font-weight: 700;
+  font-style: normal;
+}
+.mode-banner-note {
+  color: #9a3412;
+  font-size: 12px;
+  margin-top: 10px;
+  line-height: 1.5;
+}
+.section-inverse {
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+.section-inverse h3 { color: #9a3412; }
+.btn-inverse {
+  background: #ea580c !important;
+  box-shadow: 0 2px 6px rgba(234,88,12,0.3);
+}
+.btn-inverse:hover { background: #c2410c !important; }
+
+/* Candidate card in inverse mode */
+.candidate {
+  border-left: 5px solid #ea580c;
+  position: relative;
+}
+.candidate-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.interval-big {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 2px solid #f59e0b;
+  border-radius: 10px;
+  padding: 10px 18px;
+  text-align: center;
+  min-width: 130px;
+}
+.interval-big .interval-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #92400e;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.interval-big .interval-value {
+  display: block;
+  font-size: 22px;
+  font-weight: 700;
+  color: #7c2d12;
+  font-family: "Georgia", serif;
+}
+.interval-big .interval-sub {
+  display: block;
+  font-size: 10.5px;
+  color: #9a3412;
+  font-style: italic;
+}
+
+/* Inline formula derivation block */
+.formulas-inline {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin: 16px 0;
+}
+.formulas-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #c2410c;
+  margin-bottom: 10px;
+}
+.formula-step {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.formula-step:last-child { margin-bottom: 0; }
+.formula-num {
+  display: inline-block;
+  font-size: 14px;
+  color: #ea580c;
+  font-weight: 700;
+  min-width: 20px;
+}
+.formula-label {
+  font-weight: 700;
+  color: #9a3412;
+  min-width: 86px;
+  font-size: 13px;
+}
+.formulas-inline .formula {
+  font-family: "Cambria Math", Georgia, serif;
+  font-style: italic;
+  font-size: 13px;
+  background: white;
+  padding: 5px 11px;
+  border-radius: 4px;
+  flex: 1;
+  border: 1px solid #fde68a;
+  min-width: 0;
+  word-break: break-word;
+}
+
+/* Result cards in inverse mode */
+.result-card.data-given {
+  background: #dbeafe !important;
+  border: 1px solid #93c5fd;
+  color: #1e3a8a !important;
+}
+.result-card.data-known {
+  background: #f1f5f9 !important;
+  border: 1px solid #cbd5e1;
+  color: #0c4a6e !important;
+}
+.result-card.data-computed {
+  background: #fef3c7 !important;
+  border: 1px solid #f59e0b;
+  color: #92400e !important;
+}
+.section-legend {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: #475569;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.section-legend .legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.section-legend .swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1px solid;
+}
+
+/* Day tags for previous/next-day tide events */
+.day-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.day-tag.prev {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+.day-tag.next {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+tr.tide-prev td { background: rgba(239,68,68,0.05); }
+tr.tide-next td { background: rgba(16,185,129,0.05); }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header-bar">
+  <div class="deco-icon" title="Ancla">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M50 4 Q44 12 50 18" fill="none" stroke="#a16207" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="50" cy="22" r="8" fill="none" stroke="#0c4a6e" stroke-width="3"/>
+      <rect x="30" y="33" width="6" height="6" fill="#0c4a6e"/>
+      <rect x="64" y="33" width="6" height="6" fill="#0c4a6e"/>
+      <rect x="34" y="34" width="32" height="4" rx="1" fill="#0c4a6e"/>
+      <rect x="47" y="38" width="6" height="36" fill="#0c4a6e"/>
+      <path d="M16 72 Q50 96 84 72" fill="none" stroke="#0c4a6e" stroke-width="5" stroke-linecap="round"/>
+      <polygon points="16,72 11,58 30,67" fill="#0c4a6e"/>
+      <polygon points="84,72 89,58 70,67" fill="#0c4a6e"/>
+      <circle cx="50" cy="55" r="3" fill="#fef3c7"/>
+    </svg>
+  </div>
+  <div class="title-block">
+    <h1><span class="wave">~</span> Calculadora de Mareas <span class="wave">~</span></h1>
+    <p class="author">Por <b>Diego Estévez García</b>, Capitán de Yate</p>
+    <p class="subtitle">Calcula la sonda en un instante dado o la hora a la que se alcanzará una determinada sonda, aplicando la fórmula del Anuario de Mareas: <b>Sm = Sc + Abj + Cm + C<sub>p</sub></b>.</p>
+  </div>
+  <div class="deco-icon" title="Rosa de los vientos">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <radialGradient id="cBg">
+          <stop offset="0%" stop-color="#fef9e7"/>
+          <stop offset="100%" stop-color="#fde68a"/>
+        </radialGradient>
+      </defs>
+      <circle cx="50" cy="50" r="46" fill="url(#cBg)" stroke="#1e3a5f" stroke-width="2"/>
+      <circle cx="50" cy="50" r="40" fill="none" stroke="#1e3a5f" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.5"/>
+      <polygon points="50,6 54,48 50,50" fill="#dc2626"/>
+      <polygon points="50,6 46,48 50,50" fill="#fef9e7" stroke="#1e3a5f" stroke-width="0.5"/>
+      <polygon points="50,94 54,52 50,50" fill="#1e3a5f"/>
+      <polygon points="50,94 46,52 50,50" fill="#fef9e7" stroke="#1e3a5f" stroke-width="0.5"/>
+      <polygon points="94,50 52,46 50,50" fill="#1e3a5f"/>
+      <polygon points="94,50 52,54 50,50" fill="#fef9e7" stroke="#1e3a5f" stroke-width="0.5"/>
+      <polygon points="6,50 48,46 50,50" fill="#1e3a5f"/>
+      <polygon points="6,50 48,54 50,50" fill="#fef9e7" stroke="#1e3a5f" stroke-width="0.5"/>
+      <polygon points="78,22 53,47 50,50" fill="#1e3a5f" opacity="0.65"/>
+      <polygon points="22,22 47,47 50,50" fill="#1e3a5f" opacity="0.65"/>
+      <polygon points="78,78 53,53 50,50" fill="#1e3a5f" opacity="0.65"/>
+      <polygon points="22,78 47,53 50,50" fill="#1e3a5f" opacity="0.65"/>
+      <circle cx="50" cy="50" r="3.5" fill="#dc2626" stroke="#1e3a5f" stroke-width="0.5"/>
+      <text x="50" y="17" font-family="Georgia,serif" font-size="9" font-weight="700" fill="#1e3a5f" text-anchor="middle">N</text>
+      <text x="50" y="92" font-family="Georgia,serif" font-size="8" font-weight="700" fill="#1e3a5f" text-anchor="middle">S</text>
+      <text x="87" y="53" font-family="Georgia,serif" font-size="8" font-weight="700" fill="#1e3a5f" text-anchor="middle">E</text>
+      <text x="13" y="53" font-family="Georgia,serif" font-size="8" font-weight="700" fill="#1e3a5f" text-anchor="middle">O</text>
+    </svg>
+  </div>
+</div>
+
+<div class="modo-tabs">
+  <button class="tab active" data-mode="sonda">1) Sonda en un momento dado</button>
+  <button class="tab" data-mode="hora">2) Hora a la que habrá una sonda</button>
+</div>
+
+<!-- Common: fecha + Sc + presión + adelanto -->
+<div class="section">
+  <h3>Datos generales</h3>
+  <div class="row">
+    <div class="field">
+      <label>Fecha</label>
+      <div style="display:flex; gap:6px; align-items:stretch">
+        <input type="date" id="fecha" style="flex:1; min-width:0">
+        <button type="button" class="btn-hoy" onclick="setHoy()" title="Saltar a hoy">HOY</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Sonda de la carta Sc</label>
+      <input type="number" id="sc" step="0.01" placeholder="m">
+    </div>
+    <div class="field">
+      <label>Adelanto horario</label>
+      <select id="adelanto">
+        <option value="1">+1 h (Invierno · CET)</option>
+        <option value="2" selected>+2 h (Verano · CEST)</option>
+      </select>
+    </div>
+  </div>
+  <div class="row" style="margin-top:6px">
+    <div class="field" style="flex:2 1 280px">
+      <label>Puerto IHM (Armada Española)</label>
+      <select id="puerto-ihm">
+        <option value="">— Selecciona un puerto —</option>
+      </select>
+    </div>
+    <div class="field" style="flex:1 1 140px">
+      <label>Presión atmosférica (mb)</label>
+      <input type="number" id="presion" step="1" value="1013">
+    </div>
+    <div class="field" style="flex:0 0 auto; display:flex; align-items:flex-end">
+      <button class="btn btn-sm btn-example" type="button" onclick="obtenerPresion()" id="btn-presion">Obtener presión online</button>
+    </div>
+  </div>
+  <div id="presion-status" class="adv-hint" style="margin-top:4px">Por defecto 1013 mb (sin corrección). Si seleccionas un puerto puedo consultar la presión actual en internet (Open-Meteo). 1 mb &rarr; 1 cm de marea.</div>
+</div>
+
+<!-- Tide table -->
+<div class="section">
+  <h3>Tabla de mareas del Anuario</h3>
+  <div class="notice">Los datos de marea (hora y altura de cada pleamar y bajamar) deben obtenerse del <b>Anuario de Mareas</b> de tu puerto. Introdúcelos abajo. Las horas son <b>UTC</b>.</div>
+  <p class="adv-hint">Introduce los 4 eventos del día. Para mayor precisión añade también el último evento del día anterior y/o el primero del día siguiente.</p>
+  <table class="tides-table">
+    <thead>
+      <tr>
+        <th style="width:90px">Tipo</th>
+        <th style="width:120px">Hora (UTC)</th>
+        <th style="width:130px">Altura (m)</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="tides-body"></tbody>
+  </table>
+  <button class="btn btn-sm btn-add" onclick="addTideRow()">+ Añadir evento</button>
+</div>
+
+<!-- Tide auto-fetch from IHM -->
+<div class="section">
+  <h3>⚓ Mareas oficiales del IHM (Armada Española)</h3>
+  <div class="notice"><b>Datos oficiales</b> del Instituto Hidrográfico de la Marina (Armada Española), idénticos a las predicciones publicadas en el Anuario de Mareas. Referencia: <b>Cero Hidrográfico</b> del puerto (compatible directamente con la sonda de carta Sc).</div>
+  <p class="adv-hint">Selecciona el <b>Puerto IHM</b> y la <b>Fecha</b> en "Datos generales" y pulsa el botón. Los eventos del día sustituirán a los introducidos arriba.</p>
+  <button class="btn btn-sm btn-anuario" onclick="obtenerMareasIHM()" id="btn-mareas">⚓ Obtener mareas oficiales del IHM</button>
+  <div id="mareas-status" class="adv-hint" style="margin-top:8px"></div>
+</div>
+
+<!-- Mode 1 -->
+<div id="mode-sonda">
+  <div class="section">
+    <h3>Hora a calcular</h3>
+    <div class="row">
+      <div class="field">
+        <label>Hora UTC</label>
+        <input type="time" id="hora-utc">
+      </div>
+      <div class="field">
+        <label>Hora oficial</label>
+        <input type="time" id="hora-oficial">
+      </div>
+    </div>
+    <div class="adv-hint">Ambos campos están enlazados según el adelanto horario.</div>
+  </div>
+  <button class="btn" onclick="calcularSonda()">Calcular sonda Sm</button>
+</div>
+
+<!-- Mode 2 -->
+<div id="mode-hora" class="hidden">
+  <div class="mode-banner inverse">
+    <div class="mode-banner-title">⟲ Marea inversa · ¿A qué hora habrá esa sonda?</div>
+    <div class="mode-banner-desc">Conocida la sonda <b>S<sub>m</sub></b> que deseas alcanzar, calculamos a qué hora se producirá durante el día. Se aplica el despeje de la fórmula del Anuario:</div>
+    <div class="mode-banner-formula">
+      <span>S<sub>m</sub> = S<sub>c</sub> + A<sub>bj</sub> + C<sub>m</sub> + C<sub>p</sub></span>
+      <span class="arrow">⟹</span>
+      <span><b>C<sub>m</sub> = S<sub>m</sub> − S<sub>c</sub> − A<sub>bj</sub> − C<sub>p</sub></b></span>
+      <span class="arrow">⟹</span>
+      <span><b>I = (D / 90°) · arcsen( √(C<sub>m</sub> / A) )</b></span>
+    </div>
+    <div class="mode-banner-note">Donde <b>D</b> es la duración de la creciente o vaciante y <b>A</b> la amplitud (pleamar − bajamar). Pueden existir <u>varias soluciones</u> en el día (una por cada fase compatible).</div>
+  </div>
+  <div class="section section-inverse">
+    <h3>📥 Dato a introducir</h3>
+    <div class="row">
+      <div class="field">
+        <label>Sonda S<sub>m</sub> deseada (m)</label>
+        <input type="number" id="sm-deseada" step="0.01" placeholder="ej. 8,10">
+      </div>
+    </div>
+  </div>
+  <button class="btn btn-inverse" onclick="calcularHora()">⟲ Calcular hora</button>
+</div>
+
+<div id="results"></div>
+
+<div class="rope-divider"></div>
+<div class="footer">
+  <span class="wheel" title="Timón">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="50" cy="50" r="32" fill="none" stroke="#7c2d12" stroke-width="4"/>
+      <circle cx="50" cy="50" r="8" fill="#a16207" stroke="#7c2d12" stroke-width="1.5"/>
+      <circle cx="50" cy="50" r="3" fill="#7c2d12"/>
+      <g stroke="#7c2d12" stroke-width="3" stroke-linecap="round">
+        <line x1="50" y1="6"  x2="50" y2="18"/>
+        <line x1="50" y1="82" x2="50" y2="94"/>
+        <line x1="6" y1="50"  x2="18" y2="50"/>
+        <line x1="82" y1="50" x2="94" y2="50"/>
+        <line x1="19" y1="19" x2="28" y2="28"/>
+        <line x1="72" y1="72" x2="81" y2="81"/>
+        <line x1="19" y1="81" x2="28" y2="72"/>
+        <line x1="72" y1="28" x2="81" y2="19"/>
+      </g>
+      <g stroke="#7c2d12" stroke-width="2" fill="none">
+        <line x1="50" y1="18" x2="50" y2="42"/>
+        <line x1="50" y1="58" x2="50" y2="82"/>
+        <line x1="18" y1="50" x2="42" y2="50"/>
+        <line x1="58" y1="50" x2="82" y2="50"/>
+      </g>
+    </svg>
+  </span>
+  © <b>Diego Estévez García</b>, Capitán de Yate &nbsp;·&nbsp; Cálculo basado en el Anuario de Mareas (IHM)
+  <span class="wheel" title="Timón">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="50" cy="50" r="32" fill="none" stroke="#7c2d12" stroke-width="4"/>
+      <circle cx="50" cy="50" r="8" fill="#a16207" stroke="#7c2d12" stroke-width="1.5"/>
+      <circle cx="50" cy="50" r="3" fill="#7c2d12"/>
+      <g stroke="#7c2d12" stroke-width="3" stroke-linecap="round">
+        <line x1="50" y1="6"  x2="50" y2="18"/>
+        <line x1="50" y1="82" x2="50" y2="94"/>
+        <line x1="6" y1="50"  x2="18" y2="50"/>
+        <line x1="82" y1="50" x2="94" y2="50"/>
+        <line x1="19" y1="19" x2="28" y2="28"/>
+        <line x1="72" y1="72" x2="81" y2="81"/>
+        <line x1="19" y1="81" x2="28" y2="72"/>
+        <line x1="72" y1="28" x2="81" y2="19"/>
+      </g>
+      <g stroke="#7c2d12" stroke-width="2" fill="none">
+        <line x1="50" y1="18" x2="50" y2="42"/>
+        <line x1="50" y1="58" x2="50" y2="82"/>
+        <line x1="18" y1="50" x2="42" y2="50"/>
+        <line x1="58" y1="50" x2="82" y2="50"/>
+      </g>
+    </svg>
+  </span>
+</div>
+
+</div>
+
+<script>
+// -------------- Saltar a HOY --------------
+function setHoy(){
+  const t = new Date();
+  const y = t.getFullYear();
+  const m = String(t.getMonth()+1).padStart(2,'0');
+  const d = String(t.getDate()).padStart(2,'0');
+  document.getElementById('fecha').value = `${y}-${m}-${d}`;
+}
+
+// -------------- Utilidades de tiempo --------------
+function toMin(hhmm){
+  if(!hhmm) return null;
+  const [h,m] = hhmm.split(':').map(Number);
+  return h*60+m;
+}
+function fmtHM(min){
+  min = ((min%1440)+1440)%1440;
+  const h = Math.floor(min/60);
+  const m = Math.round(min - h*60);
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+}
+function fmtDur(min){
+  const h = Math.floor(Math.abs(min)/60);
+  const m = Math.round(Math.abs(min)-h*60);
+  return (min<0?'-':'')+h+'h '+String(m).padStart(2,'0')+'m';
+}
+
+// -------------- Estado tabla mareas --------------
+let tideRows = [];
+function renderTides(){
+  const tbody = document.getElementById('tides-body');
+  tbody.innerHTML = '';
+  tideRows.forEach((r, idx) => {
+    const day = r.day || 0;
+    const trClass = day === -1 ? 'tide-prev' : (day === 1 ? 'tide-next' : '');
+    const dayBadge = day === -1
+      ? '<span class="day-tag prev" title="Última marea del día anterior">Ayer</span>'
+      : (day === 1
+          ? '<span class="day-tag next" title="Primera marea del día siguiente">Mañana</span>'
+          : '');
+    const tr = document.createElement('tr');
+    if(trClass) tr.className = trClass;
+    tr.innerHTML = `
+      <td>
+        <select onchange="tideRows[${idx}].type=this.value">
+          <option value="P" ${r.type==='P'?'selected':''}>Pleamar</option>
+          <option value="B" ${r.type==='B'?'selected':''}>Bajamar</option>
+        </select>
+      </td>
+      <td>
+        <div style="display:flex; gap:6px; align-items:center">
+          <input type="time" value="${r.time||''}" onchange="tideRows[${idx}].time=this.value" style="flex:1; min-width:0">
+          ${dayBadge}
+        </div>
+      </td>
+      <td><input type="number" step="0.01" value="${r.height ?? ''}" onchange="tideRows[${idx}].height=parseFloat(this.value)"></td>
+      <td><button class="btn btn-del" onclick="delTideRow(${idx})">×</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+function addTideRow(){
+  // Auto-alterna pleamar/bajamar
+  const last = tideRows[tideRows.length-1];
+  const type = !last ? 'P' : (last.type==='P'?'B':'P');
+  tideRows.push({type, time:'', height: null});
+  renderTides();
+}
+function delTideRow(i){
+  tideRows.splice(i,1);
+  renderTides();
+}
+
+// -------------- Obtener presión online por puerto seleccionado --------------
+async function obtenerPresion(){
+  const sel = document.getElementById('puerto-ihm');
+  const portId = sel.value;
+  const fecha = document.getElementById('fecha').value;
+  const horaUTC = document.getElementById('hora-utc').value;
+  const statusEl = document.getElementById('presion-status');
+  const btn = document.getElementById('btn-presion');
+  if(!portId){
+    statusEl.innerHTML = '<span style="color:#dc2626">Selecciona un puerto para consultar la presión.</span>';
+    return;
+  }
+  const port = IHM_PORTS.find(p => p.id == portId);
+  if(!port){ statusEl.innerHTML='<span style="color:#dc2626">Puerto no encontrado.</span>'; return; }
+  btn.disabled = true;
+  const oldText = btn.textContent;
+  btn.textContent = 'Consultando…';
+  statusEl.innerHTML = 'Consultando presión en <b>'+port.name+'</b> ('+port.lat.toFixed(2)+', '+port.lon.toFixed(2)+')…';
+  try {
+    const url = 'https://api.open-meteo.com/v1/forecast?latitude='+port.lat+'&longitude='+port.lon+'&hourly=pressure_msl&past_days=7&forecast_days=10&timezone=UTC';
+    const wxR = await fetch(url);
+    const wx  = await wxR.json();
+    if(!wx.hourly || !wx.hourly.time){
+      statusEl.innerHTML = '<span style="color:#dc2626">No se pudieron obtener datos meteorológicos.</span>';
+      return;
+    }
+    // Clave "YYYY-MM-DDTHH:00"
+    let key = null;
+    if(fecha && horaUTC){
+      const hh = horaUTC.split(':')[0];
+      key = fecha+'T'+hh+':00';
+    }
+    let idx = key ? wx.hourly.time.indexOf(key) : -1;
+    if(idx<0){
+      const now = new Date();
+      const isoNow = now.toISOString().slice(0,13)+':00';
+      idx = wx.hourly.time.indexOf(isoNow);
+      if(idx<0) idx = 0;
+    }
+    const presion = wx.hourly.pressure_msl[idx];
+    if(presion==null){
+      statusEl.innerHTML = '<span style="color:#dc2626">Sin dato de presión para esa hora.</span>';
+      return;
+    }
+    document.getElementById('presion').value = Math.round(presion);
+    statusEl.innerHTML = 'Presión obtenida para <b>'+port.name+'</b> el <b>'+wx.hourly.time[idx].replace('T',' ')+' UTC</b>: <b>'+presion.toFixed(1)+' mb</b>. Fuente: Open-Meteo.';
+  } catch(err) {
+    statusEl.innerHTML = '<span style="color:#dc2626">Error consultando la presión: '+err.message+'</span>';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = oldText;
+  }
+}
+
+// -------------- Catálogo de puertos del IHM (Armada Española) --------------
+const IHM_PORTS = [
+  {id:20,name:"A Coruña",lat:43.357,lon:-8.388},
+  {id:71,name:"A Guarda",lat:41.898,lon:-8.877},
+  {id:49,name:"Algeciras",lat:36.180,lon:-5.400},
+  {id:14,name:"Alúmina Española (San Cibrao)",lat:43.708,lon:-7.462},
+  {id:57,name:"Arinaga (Gran Canaria)",lat:27.847,lon:-15.402},
+  {id:53,name:"Arrecife (Lanzarote)",lat:28.967,lon:-13.530},
+  {id:7,name:"Avilés (San Juan de Nieva)",lat:43.592,lon:-5.930},
+  {id:32,name:"Ayamonte",lat:37.212,lon:-7.405},
+  {id:30,name:"Baiona",lat:42.118,lon:-8.845},
+  {id:47,name:"Barbate",lat:36.185,lon:-5.933},
+  {id:72,name:"Bermeo",lat:43.421,lon:-2.713},
+  {id:2,name:"Bilbao",lat:43.369,lon:-3.069},
+  {id:37,name:"Bonanza (Sanlúcar de Barrameda)",lat:36.802,lon:-6.338},
+  {id:13,name:"Burela",lat:43.657,lon:-7.348},
+  {id:42,name:"Cádiz",lat:36.535,lon:-6.297},
+  {id:22,name:"Camariñas",lat:43.128,lon:-9.182},
+  {id:16,name:"Cariño",lat:43.738,lon:-7.864},
+  {id:17,name:"Cedeira",lat:43.660,lon:-8.060},
+  {id:51,name:"Ceuta",lat:35.892,lon:-5.318},
+  {id:39,name:"Chipiona",lat:36.745,lon:-6.435},
+  {id:15,name:"Cillero (Ría de Viveiro)",lat:43.680,lon:-7.594},
+  {id:46,name:"Conil",lat:36.282,lon:-6.090},
+  {id:8,name:"Cudillero",lat:43.563,lon:-6.143},
+  {id:41,name:"El Puerto de Santa María",lat:36.602,lon:-6.235},
+  {id:18,name:"Ferrol",lat:43.482,lon:-8.233},
+  {id:23,name:"Fisterra",lat:42.910,lon:-9.262},
+  {id:12,name:"Foz",lat:43.567,lon:-7.258},
+  {id:44,name:"Gallineras",lat:36.475,lon:-6.213},
+  {id:6,name:"Gijón",lat:43.555,lon:-5.700},
+  {id:64,name:"Granadilla (Tenerife)",lat:28.108,lon:-16.508},
+  {id:34,name:"Isla Cristina",lat:37.197,lon:-7.317},
+  {id:43,name:"La Carraca",lat:36.483,lon:-6.183},
+  {id:70,name:"Langosteira (Puerto exterior de A Coruña)",lat:43.343,lon:-8.500},
+  {id:31,name:"Lisboa",lat:38.700,lon:-9.183},
+  {id:4,name:"Llanes",lat:43.422,lon:-4.755},
+  {id:63,name:"Los Cristianos (Tenerife)",lat:28.046,lon:-16.717},
+  {id:61,name:"Los Gigantes (Tenerife)",lat:28.247,lon:-16.840},
+  {id:21,name:"Malpica",lat:43.323,lon:-8.808},
+  {id:28,name:"Marín (Ría de Pontevedra)",lat:42.395,lon:-8.708},
+  {id:33,name:"Marina de Isla Canela",lat:37.182,lon:-7.347},
+  {id:36,name:"Mazagón (Huelva)",lat:37.130,lon:-6.835},
+  {id:55,name:"Morro Jable (Fuerteventura)",lat:28.050,lon:-14.350},
+  {id:9,name:"Navia",lat:43.547,lon:-6.728},
+  {id:1,name:"Pasajes",lat:43.327,lon:-1.922},
+  {id:58,name:"Pasito Blanco (Gran Canaria)",lat:27.748,lon:-15.628},
+  {id:24,name:"Portosín (Ría de Muros y Noia)",lat:42.762,lon:-8.948},
+  {id:62,name:"Puerto de la Cruz (Tenerife)",lat:28.418,lon:-16.547},
+  {id:67,name:"Puerto de la Estaca (El Hierro)",lat:27.783,lon:-17.900},
+  {id:56,name:"Puerto de la Luz (Gran Canaria)",lat:28.150,lon:-15.413},
+  {id:59,name:"Puerto de las Nieves (Gran Canaria)",lat:28.100,lon:-15.713},
+  {id:54,name:"Puerto del Rosario (Fuerteventura)",lat:28.500,lon:-13.860},
+  {id:35,name:"Punta Umbría",lat:37.175,lon:-6.965},
+  {id:11,name:"Ribadeo",lat:43.547,lon:-7.041},
+  {id:5,name:"Ribadesella",lat:43.462,lon:-5.058},
+  {id:40,name:"Rota",lat:36.617,lon:-6.358},
+  {id:19,name:"Sada Fontán (Ría de Betanzos)",lat:43.355,lon:-8.245},
+  {id:65,name:"San Sebastián de la Gomera",lat:28.083,lon:-17.108},
+  {id:45,name:"Sancti Petri",lat:36.388,lon:-6.213},
+  {id:66,name:"Santa Cruz de La Palma",lat:28.683,lon:-17.764},
+  {id:60,name:"Santa Cruz de Tenerife",lat:28.467,lon:-16.247},
+  {id:25,name:"Santa Uxía de Ribeíra (Ría de Arousa)",lat:42.555,lon:-8.997},
+  {id:3,name:"Santander",lat:43.462,lon:-3.798},
+  {id:27,name:"Sanxenxo (Ría de Pontevedra)",lat:42.395,lon:-8.812},
+  {id:38,name:"Sevilla",lat:37.353,lon:-6.000},
+  {id:50,name:"Sotogrande",lat:36.282,lon:-5.275},
+  {id:52,name:"Tánger",lat:35.787,lon:-5.811},
+  {id:10,name:"Tapia",lat:43.572,lon:-6.945},
+  {id:48,name:"Tarifa",lat:36.007,lon:-5.605},
+  {id:29,name:"Vigo",lat:42.240,lon:-8.730},
+  {id:26,name:"Vilagarcía (Ría de Arousa)",lat:42.601,lon:-8.770}
+];
+
+function poblarPuertos(){
+  const sel = document.getElementById('puerto-ihm');
+  IHM_PORTS.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = p.name;
+    opt.dataset.lat = p.lat;
+    opt.dataset.lon = p.lon;
+    sel.appendChild(opt);
+  });
+}
+
+// -------------- Obtener mareas oficiales del IHM --------------
+// Parsea la respuesta de texto plano del IHM y devuelve la lista de eventos.
+function parseIHMResponse(text){
+  if(/no existen datos/i.test(text)) return null; // sin datos para esa fecha
+  const lines = text.split('\n');
+  let headerIdx = -1;
+  for(let i=0;i<lines.length;i++){
+    if(/hora.*altura.*tipo/i.test(lines[i])){ headerIdx = i; break; }
+  }
+  if(headerIdx === -1) return null;
+  const events = [];
+  for(let i=headerIdx+1;i<lines.length;i++){
+    const ln = lines[i].trim();
+    if(!ln) continue;
+    const parts = ln.split(/\t+|\s{2,}/);
+    if(parts.length < 3) continue;
+    const hora = parts[0], alt = parts[1], tipo = parts[2].toLowerCase();
+    if(!/^\d{1,2}:\d{2}$/.test(hora)) continue;
+    if(isNaN(parseFloat(alt))) continue;
+    events.push({
+      type: tipo.startsWith('p') ? 'P' : 'B',
+      time: hora.length===4 ? '0'+hora : hora,
+      height: parseFloat(alt)
+    });
+  }
+  return events;
+}
+
+async function fetchIHMDay(portId, yyyymmdd){
+  try {
+    const r = await fetch('https://ideihm.covam.es/api-ihm/getmarea?request=gettide&id='+portId+'&date='+yyyymmdd);
+    if(!r.ok) return null;
+    const text = await r.text();
+    return parseIHMResponse(text);
+  } catch(e){ return null; }
+}
+
+async function obtenerMareasIHM(){
+  const sel = document.getElementById('puerto-ihm');
+  const portId = sel.value;
+  const fecha = document.getElementById('fecha').value;
+  const statusEl = document.getElementById('mareas-status');
+  const btn = document.getElementById('btn-mareas');
+  if(!portId){ statusEl.innerHTML = '<span style="color:#dc2626">Selecciona un puerto en "Datos generales".</span>'; return; }
+  if(!fecha){  statusEl.innerHTML = '<span style="color:#dc2626">Introduce una fecha.</span>'; return; }
+  const portName = sel.options[sel.selectedIndex].textContent;
+  btn.disabled = true;
+  const oldText = btn.textContent;
+  btn.textContent = 'Consultando IHM…';
+  statusEl.innerHTML = 'Consultando IHM (Armada Española) para <b>'+portName+'</b> el '+fecha+' (más día anterior y siguiente)…';
+  try {
+    const fmtDate = (dt) => dt.toISOString().slice(0,10).replace(/-/g,'');
+    const d0   = new Date(fecha+'T12:00:00Z');
+    const dPrev = new Date(d0); dPrev.setUTCDate(dPrev.getUTCDate()-1);
+    const dNext = new Date(d0); dNext.setUTCDate(dNext.getUTCDate()+1);
+
+    // Consultas en paralelo: día anterior, día seleccionado, día siguiente
+    const [prevEvents, todayEvents, nextEvents] = await Promise.all([
+      fetchIHMDay(portId, fmtDate(dPrev)),
+      fetchIHMDay(portId, fmtDate(d0)),
+      fetchIHMDay(portId, fmtDate(dNext))
+    ]);
+
+    if(todayEvents === null){
+      statusEl.innerHTML='<span style="color:#dc2626">El IHM no dispone de datos para esa fecha. El servicio cubre aproximadamente del año 2020 a 2027. Para fechas fuera de ese rango, introduce los valores manualmente desde tu Anuario.</span>'; return;
+    }
+    if(todayEvents.length === 0){
+      statusEl.innerHTML='<span style="color:#dc2626">El IHM no devolvió eventos de marea para esa fecha.</span>'; return;
+    }
+
+    const all = [];
+    // Última marea del día anterior (para cálculos antes del primer evento de hoy)
+    if(prevEvents && prevEvents.length > 0){
+      const last = prevEvents[prevEvents.length-1];
+      all.push({...last, day: -1});
+    }
+    // Eventos del día seleccionado
+    todayEvents.forEach(e => all.push({...e, day: 0}));
+    // Primera marea del día siguiente (para cálculos después del último evento de hoy)
+    if(nextEvents && nextEvents.length > 0){
+      all.push({...nextEvents[0], day: 1});
+    }
+
+    tideRows = all;
+    renderTides();
+
+    const extras = [];
+    if(prevEvents && prevEvents.length > 0) extras.push('última de ayer');
+    if(nextEvents && nextEvents.length > 0) extras.push('primera de mañana');
+    const extrasTxt = extras.length ? ' (más '+extras.join(' y ')+' para cubrir cálculos cerca de medianoche)' : '';
+    statusEl.innerHTML = '<span style="color:#059669">✓ Cargados <b>'+todayEvents.length+'</b> eventos oficiales del IHM para <b>'+portName+'</b> el '+fecha+extrasTxt+'. Las alturas están referidas al <b>cero hidrográfico</b> del puerto. Fuente: <a href="https://armada.defensa.gob.es/ihm/Aplicaciones/Mareas/puerto_mareas.html?puerto='+portId+'" target="_blank">IHM · Armada Española</a>.</span>';
+  } catch(err){
+    statusEl.innerHTML = '<span style="color:#dc2626">Error al consultar el IHM: '+err.message+'</span>';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = oldText;
+  }
+}
+
+// -------------- Carga ejemplo Ferrol 13/10/2018 --------------
+function cargarEjemplo(){
+  document.getElementById('fecha').value = '2018-10-13';
+  document.getElementById('sc').value = '5';
+  document.getElementById('presion').value = '1018';
+  document.getElementById('adelanto').value = '2';
+  document.getElementById('puerto-ihm').value = '18'; // Ferrol
+  tideRows = [
+    {type:'P', time:'05:35', height:3.75},
+    {type:'B', time:'11:42', height:0.87},
+    {type:'P', time:'17:55', height:3.55},
+    {type:'B', time:'23:59', height:1.06}
+  ];
+  renderTides();
+  document.getElementById('hora-utc').value = '19:30';
+  document.getElementById('hora-utc').dispatchEvent(new Event('change'));
+  document.getElementById('sm-deseada').value = '8.10';
+}
+
+// -------------- Enlazar Hora UTC <-> oficial --------------
+document.getElementById('hora-utc').addEventListener('change', () => {
+  const v = document.getElementById('hora-utc').value;
+  if(!v) return;
+  const ad = parseInt(document.getElementById('adelanto').value);
+  document.getElementById('hora-oficial').value = fmtHM(toMin(v)+ad*60);
+});
+document.getElementById('hora-oficial').addEventListener('change', () => {
+  const v = document.getElementById('hora-oficial').value;
+  if(!v) return;
+  const ad = parseInt(document.getElementById('adelanto').value);
+  document.getElementById('hora-utc').value = fmtHM(toMin(v)-ad*60);
+});
+document.getElementById('adelanto').addEventListener('change', () => {
+  const utc = document.getElementById('hora-utc').value;
+  if(utc) document.getElementById('hora-utc').dispatchEvent(new Event('change'));
+});
+
+// -------------- Tabs --------------
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    const m = t.dataset.mode;
+    document.getElementById('mode-sonda').classList.toggle('hidden', m!=='sonda');
+    document.getElementById('mode-hora').classList.toggle('hidden', m!=='hora');
+    document.getElementById('results').innerHTML = '';
+  });
+});
+
+// -------------- Lógica de cálculo --------------
+function getEventsSorted(){
+  // Cada fila tiene un offset de día opcional (-1 = ayer, 0 = hoy, +1 = mañana).
+  // El timeMin efectivo se desplaza ±1440 min. para reflejar el día.
+  const evs = tideRows
+    .filter(r => r.time && !isNaN(r.height))
+    .map(r => ({
+      type: r.type,
+      timeMin: toMin(r.time) + (r.day || 0) * 1440,
+      height: parseFloat(r.height),
+      day: r.day || 0
+    }))
+    .sort((a,b) => a.timeMin - b.timeMin);
+  return evs;
+}
+
+function segmentInfo(prev, next){
+  const D = next.timeMin - prev.timeMin;
+  if(prev.type === 'B' && next.type === 'P'){
+    return {phase:'Creciente', D, bajamar:prev, pleamar:next, A: next.height-prev.height};
+  } else if(prev.type === 'P' && next.type === 'B'){
+    return {phase:'Vaciante', D, pleamar:prev, bajamar:next, A: prev.height-next.height};
+  }
+  return null;
+}
+
+function calcularSonda(){
+  const evs = getEventsSorted();
+  const Sc = parseFloat(document.getElementById('sc').value);
+  const P = parseFloat(document.getElementById('presion').value);
+  const utc = document.getElementById('hora-utc').value;
+  const oficial = document.getElementById('hora-oficial').value;
+  const ad = parseInt(document.getElementById('adelanto').value);
+  const resultsDiv = document.getElementById('results');
+
+  if(isNaN(Sc)) return showError('Introduce la sonda de la carta (Sc).');
+  if(!utc) return showError('Introduce la hora UTC del cálculo.');
+  if(evs.length < 2) return showError('Introduce al menos 2 eventos de marea (una pleamar y una bajamar consecutivas).');
+
+  const t = toMin(utc);
+  // Buscar el segmento que contiene t
+  let seg = null, idx = -1;
+  for(let i=0; i<evs.length-1; i++){
+    if(evs[i].timeMin <= t && evs[i+1].timeMin >= t){
+      seg = segmentInfo(evs[i], evs[i+1]);
+      idx = i;
+      break;
+    }
+  }
+  if(!seg) return showError('La hora UTC indicada está fuera del intervalo de eventos introducidos. Añade el evento anterior o posterior.');
+
+  const D = seg.D;
+  const A = seg.A;
+  const bajamar = seg.bajamar;
+  const pleamar = seg.pleamar;
+  let I;
+  if(seg.phase==='Creciente') I = t - bajamar.timeMin;
+  else I = bajamar.timeMin - t;
+
+  const angleDeg = 90*I/D;
+  const CM = A * Math.sin(angleDeg*Math.PI/180)**2;
+  const Cp = (1013 - P)/100; // 1cm/mb -> 0.01 m/mb
+  const Sm = Sc + bajamar.height + CM + Cp;
+
+  // Render
+  resultsDiv.innerHTML = `
+    <div class="result">
+      <h2>Sonda en el momento (Sm)</h2>
+      <div class="big-result">${Sm.toFixed(2)}<span class="unit">m</span></div>
+      <div class="result-sub">a las <b>${utc} UTC</b> (${oficial||fmtHM(t+ad*60)} hora oficial) · fase de <b>${seg.phase.toLowerCase()}</b></div>
+      <div class="result-detail">
+        <div class="result-card"><div class="label">Amplitud A</div><div class="value">${A.toFixed(2)} m</div></div>
+        <div class="result-card"><div class="label">Duración D</div><div class="value">${fmtDur(D)}</div></div>
+        <div class="result-card"><div class="label">Intervalo I</div><div class="value">${fmtDur(I)}</div></div>
+        <div class="result-card"><div class="label">Cm (corr. marea)</div><div class="value">${CM.toFixed(2)} m</div></div>
+        <div class="result-card"><div class="label">Cp (presión)</div><div class="value">${Cp>=0?'+':''}${Cp.toFixed(2)} m</div></div>
+        <div class="result-card"><div class="label">Abj (bajamar)</div><div class="value">${bajamar.height.toFixed(2)} m</div></div>
+      </div>
+    </div>
+    ${renderStepsSonda({Sc, P, utc, ad, seg, I, D, A, CM, Cp, Sm, bajamar, pleamar})}
+    <div class="graph-container">${drawGraph(evs, t, {seg, bajamar, pleamar, I, D, A, CM, Sm, Sc, ad})}</div>
+  `;
+}
+
+function calcularHora(){
+  const evs = getEventsSorted();
+  const Sc = parseFloat(document.getElementById('sc').value);
+  const P = parseFloat(document.getElementById('presion').value);
+  const SmDes = parseFloat(document.getElementById('sm-deseada').value);
+  const ad = parseInt(document.getElementById('adelanto').value);
+  const resultsDiv = document.getElementById('results');
+
+  if(isNaN(Sc)) return showError('Introduce la sonda de la carta (Sc).');
+  if(isNaN(SmDes)) return showError('Introduce la sonda deseada (Sm).');
+  if(evs.length < 2) return showError('Introduce al menos 2 eventos consecutivos.');
+
+  const Cp = (1013 - P)/100;
+  // CM = Sm - Sc - Abj - Cp; debe estar en [0, A]
+  const candidates = [];
+  for(let i=0; i<evs.length-1; i++){
+    const seg = segmentInfo(evs[i], evs[i+1]);
+    if(!seg) continue;
+    const CM = SmDes - Sc - seg.bajamar.height - Cp;
+    if(CM < -0.001 || CM > seg.A + 0.001) continue;
+    const ratio = Math.max(0, Math.min(1, CM/seg.A));
+    const angleRad = Math.asin(Math.sqrt(ratio));
+    const angleDeg = angleRad*180/Math.PI;
+    const I = seg.D * angleDeg / 90;
+    let momento;
+    if(seg.phase==='Creciente') momento = seg.bajamar.timeMin + I;
+    else momento = seg.bajamar.timeMin - I;
+    candidates.push({seg, I, CM, momento, angleDeg});
+  }
+
+  if(candidates.length === 0){
+    return showError('No existe una hora válida con esos datos: la sonda pedida está fuera del rango de mareas del día.');
+  }
+
+  let html = `<h2 style="margin-top:24px;color:#7c2d12">⟲ Horas posibles para S<sub>m</sub> = ${SmDes.toFixed(2)} m</h2>
+    <div class="section-legend">
+      <span class="legend-item"><span class="swatch" style="background:#dbeafe;border-color:#93c5fd"></span>Dato pedido</span>
+      <span class="legend-item"><span class="swatch" style="background:#f1f5f9;border-color:#cbd5e1"></span>Datos del Anuario</span>
+      <span class="legend-item"><span class="swatch" style="background:#fef3c7;border-color:#f59e0b"></span>Calculado</span>
+    </div>`;
+  candidates.forEach((c, k) => {
+    const horaUTC = fmtHM(c.momento);
+    const horaOf  = fmtHM(c.momento + ad*60);
+    const Abj = c.seg.bajamar.height;
+    const bajamarHora = fmtHM(c.seg.bajamar.timeMin);
+    const cpStr = Cp >= 0 ? '+'+Cp.toFixed(2) : Cp.toFixed(2);
+    const operHora = c.seg.phase === 'Creciente' ? '+' : '−';
+    html += `
+      <div class="candidate">
+        <div class="candidate-head">
+          <div>
+            <div class="hora-big">${horaUTC} UTC <span class="badge">${c.seg.phase}</span></div>
+            <div style="color:#475569;margin-top:4px">Hora oficial: <b>${horaOf}</b> (con adelanto +${ad}h)</div>
+          </div>
+          <div class="interval-big">
+            <span class="interval-label">Intervalo I</span>
+            <span class="interval-value">${fmtDur(c.I)}</span>
+            <span class="interval-sub">${c.seg.phase==='Creciente'?'tras':'antes de'} la bajamar de ${bajamarHora}</span>
+          </div>
+        </div>
+
+        <div class="formulas-inline">
+          <div class="formulas-title">Desarrollo del cálculo</div>
+          <div class="formula-step">
+            <span class="formula-num">①</span>
+            <span class="formula-label">C<sub>p</sub> =</span>
+            <span class="formula">(1013 − P) / 100 = (1013 − ${P}) / 100 = <b>${cpStr} m</b></span>
+          </div>
+          <div class="formula-step">
+            <span class="formula-num">②</span>
+            <span class="formula-label">C<sub>m</sub> =</span>
+            <span class="formula">S<sub>m</sub> − S<sub>c</sub> − A<sub>bj</sub> − C<sub>p</sub> = ${SmDes.toFixed(2)} − ${Sc.toFixed(2)} − ${Abj.toFixed(2)} − (${cpStr}) = <b>${c.CM.toFixed(2)} m</b></span>
+          </div>
+          <div class="formula-step">
+            <span class="formula-num">③</span>
+            <span class="formula-label">I =</span>
+            <span class="formula">(D / 90°) · arcsen( √(C<sub>m</sub> / A) ) = (${fmtDur(c.seg.D)} / 90°) · arcsen( √(${c.CM.toFixed(2)} / ${c.seg.A.toFixed(2)}) ) = (${fmtDur(c.seg.D)} / 90°) · ${c.angleDeg.toFixed(2)}° = <b>${fmtDur(c.I)}</b></span>
+          </div>
+          <div class="formula-step">
+            <span class="formula-num">④</span>
+            <span class="formula-label">Hora UTC =</span>
+            <span class="formula">Bajamar ${operHora} I = ${bajamarHora} ${operHora} ${fmtDur(c.I)} = <b>${horaUTC}</b></span>
+          </div>
+          <div class="formula-step">
+            <span class="formula-num">⑤</span>
+            <span class="formula-label">Hora oficial =</span>
+            <span class="formula">Hora UTC + adelanto = ${horaUTC} + ${ad} h = <b>${horaOf}</b></span>
+          </div>
+        </div>
+
+        <div class="result-detail" style="margin-top:14px">
+          <div class="result-card data-given"><div class="label">S<sub>m</sub> pedida</div><div class="value">${SmDes.toFixed(2)} m</div></div>
+          <div class="result-card data-given"><div class="label">S<sub>c</sub> (sonda carta)</div><div class="value">${Sc.toFixed(2)} m</div></div>
+          <div class="result-card data-known"><div class="label">A<sub>bj</sub> (bajamar)</div><div class="value">${Abj.toFixed(2)} m</div></div>
+          <div class="result-card data-known"><div class="label">A (amplitud)</div><div class="value">${c.seg.A.toFixed(2)} m</div></div>
+          <div class="result-card data-known"><div class="label">D (duración)</div><div class="value">${fmtDur(c.seg.D)}</div></div>
+          <div class="result-card data-computed"><div class="label">C<sub>p</sub></div><div class="value">${cpStr} m</div></div>
+          <div class="result-card data-computed"><div class="label">C<sub>m</sub></div><div class="value">${c.CM.toFixed(2)} m</div></div>
+          <div class="result-card data-computed"><div class="label">I (intervalo)</div><div class="value">${fmtDur(c.I)}</div></div>
+        </div>
+
+        <div class="graph-container" style="margin-top:14px">${drawGraph(evs, c.momento, {seg:c.seg, bajamar:c.seg.bajamar, pleamar:c.seg.pleamar, I:c.I, D:c.seg.D, A:c.seg.A, CM:c.CM, Sm:SmDes, Sc, ad})}</div>
+      </div>`;
+  });
+  resultsDiv.innerHTML = html;
+}
+
+function showError(msg){
+  document.getElementById('results').innerHTML = `<div class="error">${msg}</div>`;
+}
+
+// -------------- Pasos explicativos --------------
+function renderStepsSonda(p){
+  return `
+  <div class="steps">
+    <h3>Paso a paso del cálculo</h3>
+    <ol>
+      <li><b>Identificar el segmento.</b> El instante ${p.utc} UTC cae entre la <b>${p.seg.phase==='Creciente'?'bajamar':'pleamar'}</b> de ${fmtHM(p.seg.phase==='Creciente'?p.bajamar.timeMin:p.pleamar.timeMin)} y la <b>${p.seg.phase==='Creciente'?'pleamar':'bajamar'}</b> de ${fmtHM(p.seg.phase==='Creciente'?p.pleamar.timeMin:p.bajamar.timeMin)}. Estamos en <b>${p.seg.phase.toLowerCase()}</b>.</li>
+      <li><b>Amplitud A</b> = altura de la pleamar − altura de la bajamar = ${p.pleamar.height.toFixed(2)} − ${p.bajamar.height.toFixed(2)} = <b>${p.A.toFixed(2)} m</b>.</li>
+      <li><b>Duración D</b> de la ${p.seg.phase.toLowerCase()} (tiempo entre los dos eventos) = ${fmtDur(p.D)}.</li>
+      <li><b>Intervalo I</b> = tiempo ${p.seg.phase==='Creciente'?'desde la bajamar al momento':'desde el momento a la bajamar más próxima'} = ${fmtDur(p.I)}.</li>
+      <li><b>Corrección de marea Cm</b> (corrección aditiva a la altura de la bajamar). Se calcula con la fórmula sinusoidal:<br>
+        <span class="formula">Cm = A · sen²(90 · I / D) = ${p.A.toFixed(2)} · sen²(${(90*p.I/p.D).toFixed(2)}°) = <b>${p.CM.toFixed(2)} m</b></span><br>
+        <span class="adv-hint">Esto modela la subida/bajada como una sinusoide donde sen²(0°)=0 en la bajamar y sen²(90°)=1 en la pleamar.</span>
+      </li>
+      <li><b>Corrección por presión Cp.</b> Referencia 1013 mb. Si P &gt; 1013 la marea baja, si P &lt; 1013 sube (1 cm por mb).<br>
+        <span class="formula">Cp = (1013 − P) / 100 = (1013 − ${p.P}) / 100 = <b>${p.Cp>=0?'+':''}${p.Cp.toFixed(2)} m</b></span>
+      </li>
+      <li><b>Sonda final.</b><br>
+        <span class="formula">Sm = Sc + Abj + Cm + Cp = ${p.Sc.toFixed(2)} + ${p.bajamar.height.toFixed(2)} + ${p.CM.toFixed(2)} + (${p.Cp.toFixed(2)}) = <b>${p.Sm.toFixed(2)} m</b></span>
+      </li>
+    </ol>
+  </div>`;
+}
+
+function renderStepsHora(p){
+  return `
+  <div class="steps">
+    <h3>Paso a paso del cálculo (marea inversa)</h3>
+    <ol>
+      <li><b>Corrección por presión Cp.</b>
+        <span class="formula">Cp = (1013 − ${p.P}) / 100 = ${p.Cp>=0?'+':''}${p.Cp.toFixed(2)} m</span>
+      </li>
+      <li><b>Despejar la corrección Cm</b> de la ecuación <span class="formula">Sm = Sc + Abj + Cm + Cp</span> &rarr; <span class="formula">Cm = Sm − Sc − Abj − Cp</span>.<br>
+        Se calcula para cada segmento de marea del día y se descartan los que dan Cm fuera del rango [0, A].</li>
+      <li><b>Despejar el intervalo I</b> de <span class="formula">Cm = A · sen²(90·I/D)</span>:<br>
+        <span class="formula">I = (D / 90°) · arcsen( √(Cm / A) )</span>
+      </li>
+      <li><b>Calcular la hora UTC</b>:
+        <ul>
+          <li>Si la fase es <b>creciente</b>: Hora = Hora de la bajamar previa + I.</li>
+          <li>Si la fase es <b>vaciante</b>: Hora = Hora de la bajamar siguiente − I.</li>
+        </ul>
+      </li>
+      <li><b>Convertir a hora oficial</b>: Hora oficial = Hora UTC + ${p.ad} h (adelanto ${p.ad===1?'invierno':'verano'}).</li>
+    </ol>
+    <p><i>Pueden existir varias soluciones a lo largo del día (una por cada fase compatible). Se muestran todas arriba.</i></p>
+  </div>`;
+}
+
+// -------------- Gráfico SVG de marea --------------
+function drawGraph(events, currentMin, info){
+  // Dibuja los eventos del día con el segmento del cálculo destacado y un panel
+  // a la derecha con un velero ilustrando la sonda en el momento.
+  const W = 1100, H = 470;
+  const M = {t:50, r:230, b:95, l:60};
+  const iw = W - M.l - M.r, ih = H - M.t - M.b;
+  const ad = (info && info.ad) || 0;
+
+  let minT = events[0].timeMin;
+  let maxT = events[events.length-1].timeMin;
+  if(maxT === minT) maxT = minT + 60;
+  // pad un poco
+  const pad = (maxT-minT)*0.04;
+  minT -= pad; maxT += pad;
+
+  const Sc = parseFloat(document.getElementById('sc').value) || 0;
+  const maxH = Math.max(...events.map(e=>e.height));
+  const minH = Math.min(...events.map(e=>e.height));
+  // Las mareas se mueven SIEMPRE por encima del 0 hidrográfico; no representamos toda la profundidad de Sc.
+  // Comprimimos el rango Y a la región de la marea (con un pequeño margen) para que la onda se vea pronunciada.
+  const yMin = Math.min(0, minH) - 0.25;
+  const yMax = maxH + 0.55;
+
+  const x = t => M.l + (t-minT)/(maxT-minT) * iw;
+  const y = h => M.t + (yMax-h)/(yMax-yMin) * ih;
+
+  // Curva continua segmento a segmento
+  let curve = '';
+  for(let i=0; i<events.length-1; i++){
+    const seg = segmentInfo(events[i], events[i+1]);
+    if(!seg) continue;
+    const steps = 60;
+    for(let s=0; s<=steps; s++){
+      const tt = events[i].timeMin + (events[i+1].timeMin-events[i].timeMin)*(s/steps);
+      let I;
+      if(seg.phase==='Creciente') I = tt - seg.bajamar.timeMin;
+      else I = seg.bajamar.timeMin - tt;
+      const ang = (90*I/seg.D)*Math.PI/180;
+      const h = seg.bajamar.height + seg.A*Math.sin(ang)**2;
+      curve += (i===0 && s===0 ? 'M ':'L ') + x(tt) + ' ' + y(h) + ' ';
+    }
+  }
+
+  // Calcular altura actual sobre datum
+  let currH = null;
+  if(info && info.seg){
+    const ang = (90*info.I/info.D)*Math.PI/180;
+    currH = info.seg.bajamar.height + info.A*Math.sin(ang)**2;
+  }
+
+  // SVG
+  let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,sans-serif">`;
+
+  // Fondo agua + cero hidrográfico
+  // Datum line (0)
+  svg += `<line x1="${M.l}" y1="${y(0)}" x2="${W-M.r}" y2="${y(0)}" stroke="#94a3b8" stroke-dasharray="4 4" stroke-width="1"/>`;
+  svg += `<text x="${W-M.r+4}" y="${y(0)+4}" font-size="11" fill="#64748b">Cero hidrográfico (datum)</text>`;
+
+  // Sonda de carta como anotación (no se escala al gráfico — la marea siempre está sobre el cero hidrográfico)
+  if(Sc > 0){
+    svg += `<text x="${M.l+8}" y="${y(yMin)-26}" font-size="11" fill="#a16207" font-weight="600">⇩ Sonda de carta Sc = ${Sc.toFixed(2)} m (bajo el datum, no escalada)</text>`;
+  }
+
+  // Area bajo la curva (agua)
+  if(curve){
+    const areaPath = curve + ` L ${x(maxT)} ${y(yMin)} L ${x(minT)} ${y(yMin)} Z`;
+    svg += `<path d="${areaPath}" fill="url(#waterGrad)" opacity="0.5"/>`;
+  }
+  svg += `<defs>
+    <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7dd3fc"/>
+      <stop offset="100%" stop-color="#0c4a6e"/>
+    </linearGradient>
+  </defs>`;
+
+  // Curva
+  svg += `<path d="${curve}" fill="none" stroke="#0284c7" stroke-width="2.5"/>`;
+
+  // Eje X: ticks en cada evento + etiquetas: HH:MM UTC, (Hof HH:MM), y (ayer)/(mañana)
+  events.forEach(e => {
+    svg += `<line x1="${x(e.timeMin)}" y1="${y(yMin)}" x2="${x(e.timeMin)}" y2="${y(yMin)+5}" stroke="#475569"/>`;
+    svg += `<text x="${x(e.timeMin)}" y="${y(yMin)+18}" font-size="11" fill="#334155" text-anchor="middle" font-weight="600">${fmtHM(e.timeMin)}</text>`;
+    svg += `<text x="${x(e.timeMin)}" y="${y(yMin)+32}" font-size="9.5" fill="#0369a1" text-anchor="middle">(Hof ${fmtHM(e.timeMin + ad*60)})</text>`;
+    const dayLbl = (e.day === -1) ? '(ayer)' : (e.day === 1 ? '(mañana)' : '');
+    if(dayLbl){
+      svg += `<text x="${x(e.timeMin)}" y="${y(yMin)+46}" font-size="9.5" fill="${e.day===-1?'#991b1b':'#065f46'}" text-anchor="middle" font-style="italic">${dayLbl}</text>`;
+    }
+  });
+  // axis labels
+  svg += `<text x="${(M.l+W-M.r)/2}" y="${H-8}" font-size="12" fill="#475569" text-anchor="middle">Hora UTC · (Hof = hora oficial con adelanto +${ad}h)</text>`;
+  svg += `<text x="14" y="${M.t+ih/2}" font-size="12" fill="#475569" text-anchor="middle" transform="rotate(-90 14 ${M.t+ih/2})">Altura (m)</text>`;
+
+  // Eje Y ticks
+  for(let h=Math.floor(yMin); h<=Math.ceil(yMax); h++){
+    if(h===0) continue;
+    svg += `<line x1="${M.l-4}" y1="${y(h)}" x2="${M.l}" y2="${y(h)}" stroke="#94a3b8"/>`;
+    svg += `<text x="${M.l-6}" y="${y(h)+3}" font-size="10" fill="#64748b" text-anchor="end">${h}</text>`;
+  }
+
+  // Marcar cada pleamar/bajamar con punto + etiqueta
+  events.forEach(e => {
+    const color = e.type==='P'?'#0c4a6e':'#1e40af';
+    svg += `<circle cx="${x(e.timeMin)}" cy="${y(e.height)}" r="5" fill="${color}" stroke="white" stroke-width="2"/>`;
+    const dy = e.type==='P'? -10 : 18;
+    svg += `<text x="${x(e.timeMin)}" y="${y(e.height)+dy}" font-size="11" fill="${color}" font-weight="600" text-anchor="middle">${e.type==='P'?'Pleamar':'Bajamar'} ${e.height.toFixed(2)} m</text>`;
+  });
+
+  // Si hay info de cálculo, dibujar anotaciones del segmento
+  if(info && info.seg){
+    const seg = info.seg;
+    const bx = x(seg.bajamar.timeMin), px = x(seg.pleamar.timeMin);
+    const by = y(seg.bajamar.height), py = y(seg.pleamar.height);
+
+    // Sombreado del segmento activo
+    svg += `<rect x="${Math.min(bx,px)}" y="${M.t}" width="${Math.abs(px-bx)}" height="${ih}" fill="#fde68a" opacity="0.18"/>`;
+
+    // Amplitud A (vertical bracket en la pleamar)
+    const ampX = px + (seg.phase==='Creciente'? 22 : -22);
+    svg += `<line x1="${ampX}" y1="${py}" x2="${ampX}" y2="${by}" stroke="#dc2626" stroke-width="1.5"/>`;
+    svg += `<line x1="${ampX-5}" y1="${py}" x2="${ampX+5}" y2="${py}" stroke="#dc2626" stroke-width="1.5"/>`;
+    svg += `<line x1="${ampX-5}" y1="${by}" x2="${ampX+5}" y2="${by}" stroke="#dc2626" stroke-width="1.5"/>`;
+    svg += `<text x="${ampX + (seg.phase==='Creciente'?8:-8)}" y="${(py+by)/2+4}" font-size="12" fill="#dc2626" font-weight="700" text-anchor="${seg.phase==='Creciente'?'start':'end'}">A = ${seg.A.toFixed(2)} m</text>`;
+
+    // Duración D (horizontal arrow entre bajamar y pleamar a la altura del datum)
+    const durY = y(0) + 24;
+    const xa = Math.min(bx,px), xb = Math.max(bx,px);
+    svg += `<line x1="${xa}" y1="${durY}" x2="${xb}" y2="${durY}" stroke="#7c3aed" stroke-width="1.5"/>`;
+    svg += `<polygon points="${xa},${durY} ${xa+6},${durY-4} ${xa+6},${durY+4}" fill="#7c3aed"/>`;
+    svg += `<polygon points="${xb},${durY} ${xb-6},${durY-4} ${xb-6},${durY+4}" fill="#7c3aed"/>`;
+    svg += `<text x="${(xa+xb)/2}" y="${durY-6}" font-size="12" fill="#7c3aed" font-weight="700" text-anchor="middle">D = ${fmtDur(seg.D)}</text>`;
+
+    // Momento actual: línea vertical + punto
+    const cx = x(currentMin);
+    const cy = y(currH);
+    svg += `<line x1="${cx}" y1="${M.t}" x2="${cx}" y2="${y(yMin)}" stroke="#dc2626" stroke-dasharray="5 4" stroke-width="1.5"/>`;
+    svg += `<circle cx="${cx}" cy="${cy}" r="7" fill="#dc2626" stroke="white" stroke-width="2"/>`;
+    svg += `<text x="${cx}" y="${M.t-26}" font-size="13" fill="#dc2626" font-weight="700" text-anchor="middle">${fmtHM(currentMin)} UTC (Hof ${fmtHM(currentMin + ad*60)})</text>`;
+    svg += `<text x="${cx}" y="${M.t-10}" font-size="11" fill="#dc2626" text-anchor="middle">Sm = ${info.Sm.toFixed(2)} m</text>`;
+
+    // Intervalo I (desde bajamar al momento, o desde el momento a la bajamar)
+    const intY = y(seg.bajamar.height) + 20;
+    let ix1, ix2;
+    if(seg.phase==='Creciente'){ ix1 = bx; ix2 = cx; }
+    else { ix1 = cx; ix2 = bx; }
+    svg += `<line x1="${ix1}" y1="${intY}" x2="${ix2}" y2="${intY}" stroke="#059669" stroke-width="1.5"/>`;
+    svg += `<polygon points="${ix1},${intY} ${ix1+6},${intY-4} ${ix1+6},${intY+4}" fill="#059669"/>`;
+    svg += `<polygon points="${ix2},${intY} ${ix2-6},${intY-4} ${ix2-6},${intY+4}" fill="#059669"/>`;
+    svg += `<text x="${(ix1+ix2)/2}" y="${intY+15}" font-size="12" fill="#059669" font-weight="700" text-anchor="middle">I = ${fmtDur(info.I)}</text>`;
+
+    // Corrección Cm: bracket desde altura bajamar hasta altura actual sobre el momento
+    const cmX = cx + 18;
+    const cmY1 = y(seg.bajamar.height);
+    const cmY2 = cy;
+    svg += `<line x1="${cmX}" y1="${cmY1}" x2="${cmX}" y2="${cmY2}" stroke="#ea580c" stroke-width="1.5"/>`;
+    svg += `<line x1="${cmX-5}" y1="${cmY1}" x2="${cmX+5}" y2="${cmY1}" stroke="#ea580c" stroke-width="1.5"/>`;
+    svg += `<line x1="${cmX-5}" y1="${cmY2}" x2="${cmX+5}" y2="${cmY2}" stroke="#ea580c" stroke-width="1.5"/>`;
+    svg += `<text x="${cmX+8}" y="${(cmY1+cmY2)/2+4}" font-size="12" fill="#ea580c" font-weight="700">Cm = ${info.CM.toFixed(2)} m</text>`;
+
+    // Línea horizontal en el nivel actual (lámina de agua)
+    svg += `<line x1="${M.l}" y1="${cy}" x2="${cx}" y2="${cy}" stroke="#0ea5e9" stroke-width="1" stroke-dasharray="2 3"/>`;
+  }
+
+  // ===== Panel del velero (a la derecha del gráfico) =====
+  if(info && info.Sm != null){
+    const pX = W - 205;
+    const pY = M.t;
+    const pW = 190;
+    const pH = ih;
+    const surfY = pY + 0.30 * pH;   // línea de agua
+    const seabedY = pY + 0.85 * pH;  // techo del fondo
+    const bottomY = pY + pH;
+
+    // Marco del panel
+    svg += `<rect x="${pX}" y="${pY}" width="${pW}" height="${pH}" fill="#f0f9ff" stroke="#0c4a6e" stroke-width="1.5" rx="10"/>`;
+    // Título del panel
+    svg += `<text x="${pX + pW/2}" y="${pY + 17}" text-anchor="middle" font-weight="700" font-size="13" fill="#0c4a6e">Sonda en el momento</text>`;
+
+    // Cielo (sutil)
+    svg += `<rect x="${pX+1.5}" y="${pY+24}" width="${pW-3}" height="${surfY - pY - 24}" fill="#e0f2fe" opacity="0.55"/>`;
+    // Sol
+    svg += `<circle cx="${pX + pW - 24}" cy="${pY + 38}" r="9" fill="#fde68a" stroke="#f59e0b" stroke-width="1.2"/>`;
+    svg += `<g stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round">`;
+    for(let k=0;k<8;k++){
+      const ang = k * Math.PI/4;
+      const x1 = pX + pW - 24 + Math.cos(ang)*12;
+      const y1 = pY + 38 + Math.sin(ang)*12;
+      const x2 = pX + pW - 24 + Math.cos(ang)*16;
+      const y2 = pY + 38 + Math.sin(ang)*16;
+      svg += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
+    }
+    svg += `</g>`;
+
+    // Velero
+    const boatCX = pX + pW/2 - 14;
+    const boatBase = surfY - 2;
+    const mastTop = boatBase - 60;
+    // Mástil
+    svg += `<line x1="${boatCX}" y1="${mastTop}" x2="${boatCX}" y2="${boatBase-5}" stroke="#7c2d12" stroke-width="2.5" stroke-linecap="round"/>`;
+    // Vela mayor (a la derecha del mástil)
+    svg += `<path d="M ${boatCX} ${mastTop+3} L ${boatCX} ${boatBase-12} L ${boatCX + 26} ${boatBase-12} Z" fill="#fefce8" stroke="#7c2d12" stroke-width="1.3"/>`;
+    // Foque (vela pequeña a la izquierda)
+    svg += `<path d="M ${boatCX} ${mastTop+8} L ${boatCX} ${boatBase-16} L ${boatCX - 20} ${boatBase-13} Z" fill="#fefce8" stroke="#7c2d12" stroke-width="1.3"/>`;
+    // Banderola
+    svg += `<path d="M ${boatCX+1} ${mastTop-2} L ${boatCX+11} ${mastTop+2} L ${boatCX+1} ${mastTop+6} Z" fill="#dc2626"/>`;
+    // Casco
+    const hullHW = 32;
+    svg += `<path d="M ${boatCX - hullHW} ${boatBase-5} Q ${boatCX} ${boatBase-7} ${boatCX + hullHW} ${boatBase-5} L ${boatCX + hullHW - 6} ${boatBase+9} Q ${boatCX} ${boatBase+13} ${boatCX - hullHW + 6} ${boatBase+9} Z" fill="#7c2d12" stroke="#5b1a09" stroke-width="1"/>`;
+    // Línea de flotación
+    svg += `<line x1="${boatCX - hullHW + 2}" y1="${boatBase}" x2="${boatCX + hullHW - 2}" y2="${boatBase}" stroke="#fef3c7" stroke-width="1"/>`;
+
+    // Columna de agua (degradado)
+    svg += `<rect x="${pX+1.5}" y="${surfY}" width="${pW-3}" height="${seabedY - surfY}" fill="url(#waterGrad)" opacity="0.55"/>`;
+    // Olas
+    for(let i=0; i<3; i++){
+      const yy = surfY + i*3;
+      svg += `<path d="M ${pX+4} ${yy} Q ${pX + pW*0.25} ${yy-2.5}, ${pX + pW*0.5} ${yy} T ${pX + pW - 4} ${yy}" fill="none" stroke="#0ea5e9" stroke-width="${1.6 - i*0.3}" opacity="${0.85 - i*0.2}"/>`;
+    }
+
+    // Fondo marino (arena con grumos)
+    svg += `<path d="M ${pX+1.5} ${seabedY} Q ${pX + pW*0.22} ${seabedY-4} ${pX + pW*0.45} ${seabedY+1} T ${pX + pW - 1.5} ${seabedY-2} L ${pX + pW - 1.5} ${bottomY - 1.5} L ${pX + 1.5} ${bottomY - 1.5} Z" fill="#d4a574"/>`;
+    // Algas
+    svg += `<path d="M ${pX + 30} ${seabedY+2} Q ${pX + 33} ${seabedY-9} ${pX + 30} ${seabedY-18} Q ${pX + 27} ${seabedY-26} ${pX + 31} ${seabedY-34}" fill="none" stroke="#15803d" stroke-width="2" stroke-linecap="round"/>`;
+    svg += `<path d="M ${pX + 26} ${seabedY} Q ${pX + 29} ${seabedY-7} ${pX + 27} ${seabedY-15}" fill="none" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>`;
+    // Granos de arena
+    const grains = [12,24,40,56,70,84,98,114,128,142,156,170];
+    grains.forEach((gx, i) => {
+      const gy = seabedY + 6 + (i%4)*3 + 2;
+      svg += `<circle cx="${pX + gx}" cy="${gy}" r="1.1" fill="#92400e"/>`;
+    });
+
+    // Bracket Sm (desde la línea de flotación hasta el fondo)
+    const brackX = pX + pW - 18;
+    svg += `<line x1="${brackX}" y1="${surfY}" x2="${brackX}" y2="${seabedY}" stroke="#dc2626" stroke-width="2.5"/>`;
+    svg += `<line x1="${brackX-7}" y1="${surfY}" x2="${brackX+7}" y2="${surfY}" stroke="#dc2626" stroke-width="2.5"/>`;
+    svg += `<line x1="${brackX-7}" y1="${seabedY}" x2="${brackX+7}" y2="${seabedY}" stroke="#dc2626" stroke-width="2.5"/>`;
+
+    // Etiqueta Sm
+    const lMidY = (surfY + seabedY) / 2;
+    svg += `<rect x="${brackX - 92}" y="${lMidY - 14}" width="84" height="28" fill="#dc2626" rx="6" stroke="white" stroke-width="2"/>`;
+    svg += `<text x="${brackX - 50}" y="${lMidY - 1}" text-anchor="middle" font-weight="700" font-size="11" fill="white">S_m</text>`;
+    svg += `<text x="${brackX - 50}" y="${lMidY + 11}" text-anchor="middle" font-weight="700" font-size="12" fill="white">${info.Sm.toFixed(2)} m</text>`;
+
+    // Etiquetas auxiliares "superficie" y "fondo"
+    svg += `<text x="${pX + 8}" y="${surfY - 4}" font-size="9.5" fill="#0369a1" font-style="italic">superficie</text>`;
+    svg += `<text x="${pX + 8}" y="${seabedY - 4}" font-size="9.5" fill="#92400e" font-style="italic">fondo</text>`;
+  }
+
+  svg += '</svg>';
+  return svg;
+}
+
+// -------------- Init --------------
+(function init(){
+  // Poblar el selector de puertos del IHM
+  poblarPuertos();
+  // Fecha por defecto = hoy
+  const t = new Date();
+  const y = t.getFullYear();
+  const m = String(t.getMonth()+1).padStart(2,'0');
+  const d = String(t.getDate()).padStart(2,'0');
+  document.getElementById('fecha').value = `${y}-${m}-${d}`;
+
+  // 4 filas iniciales alternadas
+  tideRows = [
+    {type:'P', time:'', height:null},
+    {type:'B', time:'', height:null},
+    {type:'P', time:'', height:null},
+    {type:'B', time:'', height:null}
+  ];
+  renderTides();
+
+  // Hora UTC por defecto = hora actual
+  const hh = String(t.getUTCHours()).padStart(2,'0');
+  const mm = String(t.getUTCMinutes()).padStart(2,'0');
+  document.getElementById('hora-utc').value = hh+':'+mm;
+  document.getElementById('hora-utc').dispatchEvent(new Event('change'));
+})();
+</script>
+</body>
+</html>
